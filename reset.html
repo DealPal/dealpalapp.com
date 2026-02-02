@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deal Pal - Reset Password</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 450px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo h1 {
+      font-size: 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    h2 {
+      font-size: 24px;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin-top: 10px;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .message {
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .message.error {
+      background: #fee;
+      color: #c33;
+      border: 1px solid #fcc;
+    }
+    .message.success {
+      background: #efe;
+      color: #3a3;
+      border: 1px solid #cfc;
+    }
+    .message.info {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .loading-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .loading-spinner {
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    .loading-text {
+      color: #666;
+      font-size: 16px;
+    }
+    #passwordForm {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>Deal Pal</h1>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingScreen" class="loading-screen">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Verifying reset link...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorScreen" style="display: none;">
+      <h2>Reset Failed</h2>
+      <div id="errorMessage" class="message error"></div>
+    </div>
+
+    <!-- Password Form -->
+    <div id="passwordForm">
+      <h2>Create New Password</h2>
+      <p class="subtitle">Enter your new password below.</p>
+      
+      <div id="formMessage"></div>
+
+      <form id="resetForm">
+        <div class="form-group">
+          <label for="password">New Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Enter new password"
+            required
+            minlength="6"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            name="confirmPassword" 
+            placeholder="Confirm new password"
+            required
+            minlength="6"
+          >
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">
+          Reset Password
+        </button>
+      </form>
+    </div>
+
+    <!-- Success State -->
+    <div id="successScreen" style="display: none;">
+      <h2>Password Reset! ✅</h2>
+      <div class="message success">
+        Your password has been successfully reset. You can now log into the Deal Pal app with your new password.
+      </div>
+      <div class="message info">
+        Open the Deal Pal app and log in with your new password.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Supabase config - REPLACE THESE WITH YOUR ACTUAL VALUES
+    const SUPABASE_URL = 'https://xeuhlwukerommfkjrdbj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhldWhsd3VrZXJvbW1ma2pyZGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5NjA4NDIsImV4cCI6MjA1MzUzNjg0Mn0.zkkbEjQEjzkC9qT41iDGDy5EUXSJE3I3LT9iiO7PGRU';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const loadingScreen = document.getElementById('loadingScreen');
+    const errorScreen = document.getElementById('errorScreen');
+    const errorMessage = document.getElementById('errorMessage');
+    const passwordForm = document.getElementById('passwordForm');
+    const successScreen = document.getElementById('successScreen');
+    const resetForm = document.getElementById('resetForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formMessage = document.getElementById('formMessage');
+
+    // Parse URL hash for tokens
+    function parseHash() {
+      const hash = window.location.hash.substring(1);
+      if (!hash) return {};
+      
+      const params = {};
+      hash.split('&').forEach(pair => {
+        const [key, value] = pair.split('=');
+        if (key && value) {
+          params[key] = decodeURIComponent(value);
+        }
+      });
+      return params;
+    }
+
+    // Initialize
+    async function init() {
+      const params = parseHash();
+
+      // Check for errors in URL
+      if (params.error) {
+        let errorText = 'Password reset failed.';
+        
+        if (params.error_code === 'otp_expired') {
+          errorText = 'This password reset link has expired or has already been used. Please request a new one from the app.';
+        } else if (params.error_description) {
+          errorText = decodeURIComponent(params.error_description.replace(/\+/g, ' '));
+        } else {
+          errorText = params.error;
+        }
+        
+        showError(errorText);
+        return;
+      }
+
+      // Check for tokens
+      if (!params.access_token || !params.refresh_token) {
+        showError('Invalid reset link. Please request a new password reset from the app.');
+        return;
+      }
+
+      try {
+        // Establish session with the tokens
+        const { error } = await supabase.auth.setSession({
+          access_token: params.access_token,
+          refresh_token: params.refresh_token,
+        });
+
+        if (error) throw error;
+
+        // Show password form
+        loadingScreen.style.display = 'none';
+        passwordForm.style.display = 'block';
+        document.getElementById('password').focus();
+
+      } catch (error) {
+        showError('Failed to verify reset link: ' + error.message);
+      }
+    }
+
+    // Handle form submission
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      // Clear previous messages
+      formMessage.innerHTML = '';
+
+      // Validation
+      if (password.length < 6) {
+        showFormMessage('Password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showFormMessage('Passwords do not match.', 'error');
+        return;
+      }
+
+      // Disable form
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Resetting...';
+
+      try {
+        // Update password
+        const { error } = await supabase.auth.updateUser({ password });
+
+        if (error) throw error;
+
+        // Show success
+        passwordForm.style.display = 'none';
+        successScreen.style.display = 'block';
+
+      } catch (error) {
+        showFormMessage('Failed to reset password: ' + error.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Reset Password';
+      }
+    });
+
+    function showError(message) {
+      loadingScreen.style.display = 'none';
+      errorScreen.style.display = 'block';
+      errorMessage.textContent = message;
+    }
+
+    function showFormMessage(message, type) {
+      formMessage.innerHTML = `<div class="message ${type}">${message}</div>`;
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>
