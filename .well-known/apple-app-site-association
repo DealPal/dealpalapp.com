@@ -1,14 +1,9 @@
 {
   "applinks": {
     "apps": [],
-    "details": [
-      {
-        "appID": "2689SLZSLL.com.dealpal.app",
-        "paths": [
-          "/reset-password",
-          "/reset-password/*"
-        ]
-      }
-    ]
+    "details": [{
+      "appID": "2689SLZSLL.com.dealpal",
+      "paths": ["NOT /reset.html"]
+    }]
   }
 }
