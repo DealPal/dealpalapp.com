@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Deal Pal</title>
+  <meta property="og:title" content="Deal Pal" />
+  <meta property="og:description" content="Find and share local clearance deals near you!" />
+  <meta property="og:image" content="https://dealpalapp.com/logo.png" />
+  <meta property="og:url" content="https://dealpalapp.com/share" />
+  <meta name="twitter:card" content="summary" />
+</head>
+<body>
+  <script>
+    var ua = navigator.userAgent || navigator.vendor || window.opera;
+    if (/android/i.test(ua)) {
+      window.location.href = "https://play.google.com/store/apps/details?id=com.dealpal.app";
+    } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+      window.location.href = "https://apps.apple.com/ca/app/deal-pal/id6757985986";
+    } else {
+      window.location.href = "https://dealpalapp.com";
+    }
+  </script>
+</body>
+</html>
